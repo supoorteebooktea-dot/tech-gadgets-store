@@ -68,7 +68,7 @@ export default function Home() {
 
   const cartTotal = cart.reduce((sum, item) => {
     const product = products.find(p => p.id === item.id);
-    return sum + (Number(product?.price) || 0) * item.quantity;
+    return sum + (product ? Number(product.price) : 0) * item.quantity;
   }, 0);
 
   const handleCheckout = () => {
