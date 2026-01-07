@@ -8,15 +8,17 @@ import Home from "./pages/Home";
 import Checkout from "./pages/Checkout";
 import Admin from "./pages/Admin";
 import ProductDetail from "./pages/ProductDetail";
+import Sucesso from "./pages/Sucesso";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <Switch>
-      <Route path={"\\"} component={Home} />
-      <Route path={"/checkout"} component={Checkout} />
-      <Route path={"/admin"} component={Admin} />
-      <Route path={"/404"} component={NotFound} />
+      <Route path="/" component={Home} />
+      <Route path="/checkout" component={Checkout} />
+      <Route path="/admin" component={Admin} />
+      <Route path="/sucesso" component={Sucesso} />
+      <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
     </Switch>
