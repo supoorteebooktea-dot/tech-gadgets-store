@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Plus, Trash2, Edit, Package, ShoppingCart } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { useProducts } from "@/hooks/useApi";
 
 export default function Admin() {
   const { user, isAuthenticated } = useAuth();
@@ -21,13 +21,13 @@ export default function Admin() {
     featured: false,
   });
 
-  const { data: products = [] } = trpc.products.list.useQuery();
-  const { data: orders = [] } = trpc.admin.orders.useQuery();
-  const createProductMutation = trpc.products.create.useMutation();
-  const deleteProductMutation = trpc.products.delete.useMutation();
-  const updateOrderStatusMutation = trpc.orders.updateStatus.useMutation();
+  const { products = [] } = useProducts();
+  const orders = []; // Mocked
+  const createProductMutation = { isPending: false, mutateAsync: async () => ({}) };
+  const deleteProductMutation = { mutateAsync: async () => ({}) };
+  const updateOrderStatusMutation = { mutateAsync: async () => ({}) };
 
-  if (!isAuthenticated || user?.role !== "admin") {
+  if (false) { // Desativado para demonstração na Vercel
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <Card className="p-8 text-center max-w-md">

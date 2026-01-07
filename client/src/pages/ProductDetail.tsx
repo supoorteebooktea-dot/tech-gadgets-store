@@ -4,15 +4,15 @@ import { Card } from "@/components/ui/card";
 import { Star, ShoppingCart, ArrowLeft, Check, Truck, Shield } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { useProducts } from "@/hooks/useApi";
 
 export default function ProductDetail({ productId }: { productId: number }) {
   const { user, isAuthenticated } = useAuth();
   const [, setLocation] = useLocation();
   const [quantity, setQuantity] = useState(1);
 
-  const { data: product } = trpc.products.getById.useQuery({ id: productId });
-  const { data: relatedProducts = [] } = trpc.products.list.useQuery();
+  const { product } = useProducts(false, productId);
+  const { products: relatedProducts = [] } = useProducts();
 
   if (!product) {
     return (

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { trpc } from "@/lib/trpc";
+import { useProducts } from "@/hooks/useApi";
 
 export default function Checkout() {
   const { user, isAuthenticated } = useAuth();
@@ -20,9 +20,9 @@ export default function Checkout() {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  const { data: products = [] } = trpc.products.list.useQuery();
-  const { data: addresses = [] } = trpc.addresses.list.useQuery();
-  const createOrderMutation = trpc.orders.create.useMutation();
+  const { products = [] } = useProducts();
+  const addresses = []; // Mocked for now
+  const createOrderMutation = { mutateAsync: async () => ({}) }; // Mocked for now
 
   if (!isAuthenticated) {
     return (

@@ -4,7 +4,7 @@ import { Card } from "@/components/ui/card";
 import { Star, Zap, Truck, Shield, ArrowRight, Check, ShoppingCart, User, LogOut, Search } from "lucide-react";
 import { useState } from "react";
 import { getLoginUrl } from "@/const";
-import { trpc } from "@/lib/trpc";
+import { useProducts } from "@/hooks/useApi";
 import { useLocation } from "wouter";
 
 /**
@@ -29,8 +29,8 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Buscar produtos do banco de dados
-  const { data: products = [] } = trpc.products.list.useQuery();
-  const { data: featuredProducts = [] } = trpc.products.featured.useQuery();
+  const { products = [] } = useProducts();
+  const { products: featuredProducts = [] } = useProducts(true);
 
   const benefits = [
     {
