@@ -1,5 +1,4 @@
-// tRPC foi substituído por APIs Serverless nativas da Vercel para melhor compatibilidade.
-// Este arquivo foi mantido vazio para evitar erros de importação em outros componentes
-// enquanto a transição é finalizada.
+import { createTRPCReact } from "@trpc/react-query";
+import type { AppRouter } from "../../../server/routers";
 
-export const trpc = {} as any;
+export const trpc = createTRPCReact<AppRouter>();
