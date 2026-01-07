@@ -1,0 +1,10 @@
+.git
+.gitignore
+README.md
+node_modules
+.pnpm-store
+pnpm-lock.yaml
+.env.local
+.env.*.local
+vitest.config.ts
+server/auth.logout.test.ts

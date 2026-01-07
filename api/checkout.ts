@@ -1,63 +1,97 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { VercelRequest, VercelResponse } from '@vercel/node';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2023-10-16',
 });
 
+interface CheckoutItem {
+  productId: number;
+  quantity: number;
+  unitPrice: string;
+  name: string;
+}
+
+interface CheckoutPayload {
+  items: CheckoutItem[];
+  subtotal: string;
+  shippingCost: string;
+  tax: string;
+  total: string;
+  email?: string;
+  name?: string;
+}
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  // Permitir CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
+  // Apenas POST é permitido
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método não permitido' });
+    return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { items, customerEmail } = req.body;
+    const payload: CheckoutPayload = req.body;
 
-    if (!items || !Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'Carrinho vazio' });
+    // Validar dados
+    if (!payload.items || payload.items.length === 0) {
+      return res.status(400).json({ error: 'No items in cart' });
     }
 
-    // Criar line items para o Stripe
-    const lineItems = items.map((item: any) => ({
+    // Criar line items para Stripe
+    const lineItems = payload.items.map(item => ({
       price_data: {
         currency: 'brl',
         product_data: {
           name: item.name,
-          images: item.imageUrl ? [item.imageUrl] : [],
+          metadata: {
+            productId: item.productId.toString(),
+          },
         },
-        unit_amount: Math.round(item.price * 100), // Stripe usa centavos
+        unit_amount: Math.round(Number(item.unitPrice) * 100), // Stripe usa centavos
       },
-      quantity: item.quantity || 1,
+      quantity: item.quantity,
     }));
+
+    // Adicionar frete como line item
+    if (Number(payload.shippingCost) > 0) {
+      lineItems.push({
+        price_data: {
+          currency: 'brl',
+          product_data: {
+            name: 'Frete',
+          },
+          unit_amount: Math.round(Number(payload.shippingCost) * 100),
+        },
+        quantity: 1,
+      });
+    }
 
     // Criar sessão de checkout
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin}/sucesso?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${req.headers.origin}/`,
-      customer_email: customerEmail,
+      success_url: `${process.env.VERCEL_URL || 'http://localhost:3000'}/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.VERCEL_URL || 'http://localhost:3000'}/checkout?canceled=true`,
+      customer_email: payload.email,
       metadata: {
-        orderItems: JSON.stringify(items.map((i: any) => ({ id: i.id, qty: i.quantity }))),
+        subtotal: payload.subtotal,
+        tax: payload.tax,
+        total: payload.total,
+        customer_name: payload.name || 'Customer',
       },
+      allow_promotion_codes: true,
     });
 
-    return res.status(200).json({ 
+    res.status(200).json({
+      success: true,
       sessionId: session.id,
-      url: session.url 
+      url: session.url,
     });
-  } catch (error: any) {
-    console.error('Erro no checkout:', error);
-    return res.status(500).json({ error: error.message || 'Erro ao processar checkout' });
+  } catch (error) {
+    console.error('Checkout error:', error);
+    res.status(500).json({
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to create checkout session',
+    });
   }
 }
