@@ -18,6 +18,7 @@ function Router() {
       <Route path="/checkout" component={Checkout} />
       <Route path="/admin" component={Admin} />
       <Route path="/sucesso" component={Sucesso} />
+      <Route path="/product/:id" component={ProductDetail} />
       <Route path="/404" component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

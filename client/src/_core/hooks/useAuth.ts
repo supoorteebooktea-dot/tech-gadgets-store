@@ -2,8 +2,7 @@ import { useCallback, useMemo } from "react";
 
 export function useAuth() {
   // Mock de autenticação para a Vercel
-  // Em um cenário real, você usaria uma API de sessão ou JWT
-  const user = null;
+  const user = null as any;
   const isLoading = false;
   const error = null;
 
